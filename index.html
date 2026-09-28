@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -72,30 +73,55 @@
         .btn-pulse {
             animation: pulseGlow 2.5s infinite;
         }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .swal2-popup-custom {
+            border-radius: 1.5rem !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border: 2px solid #fbcfe8 !important;
+        }
+        .swal2-confirm-btn {
+            background-color: #f43f5e !important;
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 600 !important;
+        }
+        .swal2-cancel-btn {
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1.5rem !important;
+            font-weight: 600 !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative pb-12">
     <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
     
-    <header class="relative z-10 pt-10 pb-8 px-4 text-center max-w-4xl mx-auto">
-        <div class="inline-block bg-pink-100 text-pink-700 font-semibold px-4 py-1.5 rounded-full text-sm mb-4 shadow-sm border border-pink-200">
+    <header class="relative z-10 pt-10 pb-6 px-4 text-center max-w-4xl mx-auto">
+        <div class="inline-block bg-pink-100 text-pink-700 font-semibold px-4 py-1.5 rounded-full text-xs sm:text-sm mb-4 shadow-sm border border-pink-200">
             ✨ Un detalle especial hecho con amor ✨
         </div>
         <h1 class="text-4xl md:text-6xl font-extrabold text-pink-600 mb-3 tracking-tight">
             Cupones <span class="font-cursive text-5xl md:text-7xl block sm:inline text-rose-500">para Estefany</span>
         </h1>
-        <p class="text-gray-700 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
+        <p class="text-gray-700 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed mb-6 px-2">
             Hola mi amor, preparé esta colección de cupones para que los canjees cuando quieras. Solo elige uno y haz clic en canjear para enviarme el mensaje :).
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-            <a href="#cupones-section" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 btn-pulse flex items-center gap-2">
+            <a href="#cupones-section" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 btn-pulse flex items-center gap-2 text-sm sm:text-base">
                 <i class="fa-solid fa-heart"></i> Ver Mis Cupones
             </a>
         </div>
     </header>
 
-    <section id="cupones-section" class="relative z-10 max-w-6xl mx-auto px-4 w-full my-6">
-        <div class="flex items-center justify-center gap-2 overflow-x-auto pb-4 scrollbar-none no-scrollbar" id="category-filters">
+    <section id="cupones-section" class="relative z-10 max-w-6xl mx-auto px-2 sm:px-4 w-full my-4">
+        <div class="w-full overflow-x-auto no-scrollbar py-2 px-1">
+            <div class="flex items-center justify-start md:justify-center gap-2 min-w-max mx-auto px-2" id="category-filters">
+            </div>
         </div>
     </section>
 
@@ -107,16 +133,15 @@
     <footer class="relative z-10 max-w-4xl mx-auto text-center mt-16 px-4">
         <div class="border-t border-pink-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-pink-800">
             <p class="font-medium">Hecho exclusivamente para ti.</p>
-            <button onclick="confirmResetAll()" class="text-xs text-pink-500 hover:text-rose-700 underline transition-colors flex items-center gap-1">
+            <button onclick="confirmResetAll()" class="text-xs text-pink-500 hover:text-rose-700 underline transition-colors flex items-center gap-1 active:scale-95">
                 <i class="fa-solid fa-rotate-right"></i> Restablecer todos los cupones
             </button>
         </div>
     </footer>
 
-    <!-- Modal de Canje -->
     <div id="redemption-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300 relative border-2 border-pink-200 text-center" id="modal-card"> 
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center text-pink-500 text-3xl mx-auto mb-4 animate-bounce">
@@ -127,13 +152,13 @@
             <div class="p-4 bg-pink-50 rounded-2xl border border-pink-100 mb-6 text-left relative overflow-hidden">
                 <span class="text-xs font-semibold uppercase tracking-wider text-pink-500 block mb-1">Cupón:</span>
                 <span id="modal-coupon-name" class="font-bold text-gray-800 text-lg block mb-1">...</span>
-                <span id="modal-coupon-detail" class="text-xs text-gray-600 block">...</span>
+                <span id="modal-coupon-detail" class="text-xs text-gray-600 block leading-relaxed">...</span>
             </div>
             <div class="space-y-3">
-                <button id="whatsapp-btn" onclick="sendWhatsAppRedemption()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                <button id="whatsapp-btn" onclick="sendWhatsAppRedemption()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-base">
                     <i class="fa-brands fa-whatsapp text-xl"></i> Canjear por WhatsApp
                 </button>
-                <button onclick="markAsRedeemedOnly()" class="w-full bg-pink-100 hover:bg-pink-200 text-pink-700 font-semibold py-2.5 px-6 rounded-2xl transition-all text-sm">
+                <button onclick="markAsRedeemedOnly()" class="w-full bg-pink-100 hover:bg-pink-200 text-pink-700 font-semibold py-2.5 px-6 rounded-2xl transition-all active:scale-95 text-sm">
                     Solo marcar como canjeado
                 </button>
             </div>
@@ -195,7 +220,7 @@
                 category: "planes",
                 categoryLabel: "Planes & Consentimiento",
                 title: "Spa & Skincare",
-                description: "Válido por ir ponernos mascarillas, darte masajes en los pies/espalda y música relajante.",
+                description: "Válido por ir a ponernos mascarillas, darte masajes en los pies/espalda y música relajante.",
                 icon: "fa-solid fa-heart-pulse",
                 color: "from-purple-500 to-pink-500"
             },
@@ -232,17 +257,8 @@
                 id: "pasion-4",
                 category: "pasion",
                 categoryLabel: "Pasión & Intimidad",
-                title: "Tratamiento de Reina",
-                description: "Una sesión donde la prioridad absoluta e irrenunciable sea tu placer de principio a fin.",
-                icon: "fa-solid fa-fire-flame-curved",
-                color: "from-rose-500 to-pink-600"
-            },
-            {
-                id: "pasion-5",
-                category: "pasion",
-                categoryLabel: "Pasión & Intimidad",
                 title: "Desahogo / Golpe Libre Sin Represalias",
-                description: "Válido por darme un golpe, manotazo o almohadazo cuando estés molesta o traviesa, totalmente libre de reclamos.",
+                description: "Válido por darme un golpe, manotazo o almohadazo cuando estés molesta, totalmente libre de reclamos.",
                 icon: "fa-solid fa-hand-fist",
                 color: "from-rose-500 to-pink-600"
             },
@@ -319,11 +335,14 @@
             const container = document.getElementById('category-filters');
             container.innerHTML = CATEGORIES.map(cat => {
                 const isActive = currentCategory === cat.id;
-                const activeClass = isActive ? "bg-rose-500 text-white shadow-md scale-105" : "bg-white/80 text-gray-700 hover:bg-pink-100 border border-pink-200";            
+                const activeClass = isActive 
+                    ? "bg-rose-500 text-white shadow-md scale-105 border-rose-500 font-bold" 
+                    : "bg-white/90 text-gray-700 hover:bg-pink-100 border-pink-200 hover:border-pink-300 font-medium"; 
+                
                 return `
                     <button 
                         onclick="setCategory('${cat.id}')"
-                        class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${activeClass}">
+                        class="px-4 py-2.5 rounded-full text-xs sm:text-sm whitespace-nowrap transition-all duration-200 border shadow-sm active:scale-95 flex items-center justify-center shrink-0 ${activeClass}">
                         ${cat.label}
                     </button>
                 `;
@@ -340,7 +359,7 @@
             const grid = document.getElementById('coupons-grid');
             const filtered = currentCategory === 'todos' ? ALL_COUPONS : ALL_COUPONS.filter(c => c.category === currentCategory);
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-pink-400">No hay cupones en esta categoría.</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-pink-400 font-medium">No hay cupones en esta categoría.</div>`;
                 return;
             }
 
@@ -416,6 +435,17 @@
                 saveRedeemedState();
                 renderCoupons();
                 closeModal();
+
+                Swal.fire({
+                    title: '¡Cupón Marcado!',
+                    text: 'El cupón ha sido guardado como canjeado.',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        popup: 'swal2-popup-custom',
+                        confirmButton: 'swal2-confirm-btn'
+                    }
+                });
             }
         }
 
@@ -433,16 +463,49 @@
 
         function confirmResetAll() {
             if (redeemedCoupons.size === 0) {
-                alert("¡Todos los cupones están disponibles actualmente!");
+                Swal.fire({
+                    title: '¡Todos listos!',
+                    text: 'Todos los cupones están disponibles actualmente.',
+                    icon: 'info',
+                    confirmButtonText: 'Entendido',
+                    customClass: {
+                        popup: 'swal2-popup-custom',
+                        confirmButton: 'swal2-confirm-btn'
+                    }
+                });
                 return;
             }
 
-            const confirmReset = confirm("¿Quieres reiniciar todos los cupones para volver a usarlos?");
-            if (confirmReset) {
-                redeemedCoupons.clear();
-                saveRedeemedState();
-                renderCoupons();
-            }
+            Swal.fire({
+                title: '¿Restablecer cupones?',
+                text: '¿Quieres reiniciar todos los cupones para volver a usarlos desde cero?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, reiniciar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    popup: 'swal2-popup-custom',
+                    confirmButton: 'swal2-confirm-btn',
+                    cancelButton: 'swal2-cancel-btn'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    redeemedCoupons.clear();
+                    saveRedeemedState();
+                    renderCoupons();
+                    
+                    Swal.fire({
+                        title: '¡Listos de nuevo!',
+                        text: 'Todos los cupones han sido restablecidos.',
+                        icon: 'success',
+                        confirmButtonText: 'Genial',
+                        customClass: {
+                            popup: 'swal2-popup-custom',
+                            confirmButton: 'swal2-confirm-btn'
+                        }
+                    });
+                }
+            });
         }
 
         function createFloatingHearts() {
