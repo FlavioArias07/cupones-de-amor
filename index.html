@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cupones de Amor para Estefany</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fdf2f8;
+            color: #4a0e17;
+            overflow-x: hidden;
+        }
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 182, 193, 0.4);
+        }
+        .ticket-notch-left, .ticket-notch-right {
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: #fdf2f8;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        .ticket-notch-left {
+            left: -10px;
+            border-right: 1px solid rgba(244, 114, 182, 0.3);
+        }
+        .ticket-notch-right {
+            right: -10px;
+            border-left: 1px solid rgba(244, 114, 182, 0.3);
+        }
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+        .floating-heart {
+            position: fixed;
+            bottom: -50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatHeart 6s linear infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(244, 63, 94, 0.7);
+            }
+        }
+        .btn-pulse {
+            animation: pulseGlow 2.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative pb-12">
+    <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+    
+    <header class="relative z-10 pt-10 pb-8 px-4 text-center max-w-4xl mx-auto">
+        <div class="inline-block bg-pink-100 text-pink-700 font-semibold px-4 py-1.5 rounded-full text-sm mb-4 shadow-sm border border-pink-200">
+            ✨ Un detalle especial hecho con amor ✨
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-pink-600 mb-3 tracking-tight">
+            Cupones <span class="font-cursive text-5xl md:text-7xl block sm:inline text-rose-500">para Estefany</span>
+        </h1>
+        <p class="text-gray-700 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
+            Hola mi amor, preparé esta colección de cupones para que los canjees cuando quieras. Solo elige uno y haz clic en canjear para enviarme el mensaje :).
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="#cupones-section" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 btn-pulse flex items-center gap-2">
+                <i class="fa-solid fa-heart"></i> Ver Mis Cupones
+            </a>
+        </div>
+    </header>
+
+    <section id="cupones-section" class="relative z-10 max-w-6xl mx-auto px-4 w-full my-6">
+        <div class="flex items-center justify-center gap-2 overflow-x-auto pb-4 scrollbar-none no-scrollbar" id="category-filters">
+        </div>
+    </section>
+
+    <main class="relative z-10 max-w-6xl mx-auto px-4 w-full flex-1">
+        <div id="coupons-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
+    </main>
+
+    <footer class="relative z-10 max-w-4xl mx-auto text-center mt-16 px-4">
+        <div class="border-t border-pink-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-pink-800">
+            <p class="font-medium">Hecho exclusivamente para ti.</p>
+            <button onclick="confirmResetAll()" class="text-xs text-pink-500 hover:text-rose-700 underline transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-rotate-right"></i> Restablecer todos los cupones
+            </button>
+        </div>
+    </footer>
+
+    <!-- Modal de Canje -->
+    <div id="redemption-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300 relative border-2 border-pink-200 text-center" id="modal-card"> 
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center text-pink-500 text-3xl mx-auto mb-4 animate-bounce">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modal-title">¡Cupón Seleccionado!</h3>
+            <p class="text-gray-600 text-sm mb-6" id="modal-desc">¿Quieres canjear este cupón ahora mismo?</p>
+            <div class="p-4 bg-pink-50 rounded-2xl border border-pink-100 mb-6 text-left relative overflow-hidden">
+                <span class="text-xs font-semibold uppercase tracking-wider text-pink-500 block mb-1">Cupón:</span>
+                <span id="modal-coupon-name" class="font-bold text-gray-800 text-lg block mb-1">...</span>
+                <span id="modal-coupon-detail" class="text-xs text-gray-600 block">...</span>
+            </div>
+            <div class="space-y-3">
+                <button id="whatsapp-btn" onclick="sendWhatsAppRedemption()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> Canjear por WhatsApp
+                </button>
+                <button onclick="markAsRedeemedOnly()" class="w-full bg-pink-100 hover:bg-pink-200 text-pink-700 font-semibold py-2.5 px-6 rounded-2xl transition-all text-sm">
+                    Solo marcar como canjeado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ALL_COUPONS = [
+            /* 1. CITAS ROMÁNTICAS */
+            {
+                id: "citas-1",
+                category: "citas",
+                categoryLabel: "Citas Románticas",
+                title: "Cena Romántica",
+                description: "Válido por una cena en un restaurante o lugar de tu elección.",
+                icon: "fa-solid fa-utensils",
+                color: "from-pink-500 to-rose-400"
+            },
+            {
+                id: "citas-2",
+                category: "citas",
+                categoryLabel: "Citas Románticas",
+                title: "Cine",
+                description: "Entradas para la película que quieras, canchita gigante y todos los snacks a tu gusto.",
+                icon: "fa-solid fa-film",
+                color: "from-pink-500 to-rose-400"
+            },
+            {
+                id: "citas-3",
+                category: "citas",
+                categoryLabel: "Citas Románticas",
+                title: "Tarde de Postre y Café",
+                description: "Llevarte a probar un postre y/o helado al lugar que elijas.",
+                icon: "fa-solid fa-mug-hot",
+                color: "from-pink-500 to-rose-400"
+            },
+            {
+                id: "citas-4",
+                category: "citas",
+                categoryLabel: "Citas Románticas",
+                title: "Noche de Tragos & Bailoteo",
+                description: "Salida a tomar tus cócteles favoritos, bailar o ir de bar en bar a divertirnos.",
+                icon: "fa-solid fa-glass-cheers",
+                color: "from-pink-500 to-rose-400"
+            },
+
+            /* 2. PLANES & CONSENTIMIENTO */
+            {
+                id: "planes-1",
+                category: "planes",
+                categoryLabel: "Planes & Consentimiento",
+                title: "Noche de Películas",
+                description: "Válido por elegir todas las películas o maratón de tu serie.",
+                icon: "fa-solid fa-tv",
+                color: "from-purple-500 to-pink-500"
+            },
+            {
+                id: "planes-2",
+                category: "planes",
+                categoryLabel: "Planes & Consentimiento",
+                title: "Spa & Skincare",
+                description: "Válido por ir ponernos mascarillas, darte masajes en los pies/espalda y música relajante.",
+                icon: "fa-solid fa-heart-pulse",
+                color: "from-purple-500 to-pink-500"
+            },
+
+            /* 3. PASIÓN & INTIMIDAD */
+            {
+                id: "pasion-1",
+                category: "pasion",
+                categoryLabel: "Pasión & Intimidad",
+                title: "Masaje con Aceite",
+                description: "Válido por un masaje relajante hecho especialmente para ti.",
+                icon: "fa-solid fa-spa",
+                color: "from-rose-500 to-pink-600"
+            },
+            {
+                id: "pasion-2",
+                category: "pasion",
+                categoryLabel: "Pasión & Intimidad",
+                title: "Escapada a Hotel",
+                description: "Válido por una tarde privada solo para los dos.",
+                icon: "fa-solid fa-bed",
+                color: "from-rose-500 to-pink-600"
+            },
+            {
+                id: "pasion-3",
+                category: "pasion",
+                categoryLabel: "Pasión & Intimidad",
+                title: "Tú Pones las Reglas Hoy",
+                description: "Válido para que elijas la postura, el ritmo, los tiempos y toda la dinámica en la intimidad.",
+                icon: "fa-solid fa-crown",
+                color: "from-rose-500 to-pink-600"
+            },
+            {
+                id: "pasion-4",
+                category: "pasion",
+                categoryLabel: "Pasión & Intimidad",
+                title: "Tratamiento de Reina",
+                description: "Una sesión donde la prioridad absoluta e irrenunciable sea tu placer de principio a fin.",
+                icon: "fa-solid fa-fire-flame-curved",
+                color: "from-rose-500 to-pink-600"
+            },
+            {
+                id: "pasion-5",
+                category: "pasion",
+                categoryLabel: "Pasión & Intimidad",
+                title: "Desahogo / Golpe Libre Sin Represalias",
+                description: "Válido por darme un golpe, manotazo o almohadazo cuando estés molesta o traviesa, totalmente libre de reclamos.",
+                icon: "fa-solid fa-hand-fist",
+                color: "from-rose-500 to-pink-600"
+            },
+
+            /* 4. ANTOJOS & COMODINES */
+            {
+                id: "antojos-1",
+                category: "antojos",
+                categoryLabel: "Antojos & Comodines",
+                title: "Delivery de Antojo a Casa",
+                description: "Te envío tu almuerzo, postre o comida rápida a elección directamente a tu casa cuando quieras.",
+                icon: "fa-solid fa-motorcycle",
+                color: "from-amber-500 to-rose-500"
+            },
+            {
+                id: "antojos-2",
+                category: "antojos",
+                categoryLabel: "Antojos & Comodines",
+                title: "Vale por lo que Quieras",
+                description: "El comodín supremo. Pídeme cualquier cosa y no podré decir que no.",
+                icon: "fa-solid fa-wand-magic-sparkles",
+                color: "from-amber-500 to-rose-500"
+            },
+            {
+                id: "antojos-3",
+                category: "antojos",
+                categoryLabel: "Antojos & Comodines",
+                title: "Ganas la Discusión",
+                description: "Termina cualquier debate a tu favor de inmediato con un 'tienes toda la razón'.",
+                icon: "fa-solid fa-gavel",
+                color: "from-amber-500 to-rose-500"
+            }
+        ];
+
+        let currentCategory = "todos";
+        let redeemedCoupons = new Set();
+        let selectedCouponForModal = null;
+
+        const CATEGORIES = [
+            { id: "todos", label: "Todos" },
+            { id: "citas", label: "Citas Románticas" },
+            { id: "planes", label: "Planes & Consentimiento" },
+            { id: "pasion", label: "Pasión & Intimidad" },
+            { id: "antojos", label: "Antojos & Comodines" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRedeemedState();
+            renderCategoryFilters();
+            renderCoupons();
+            createFloatingHearts();
+        });
+
+        function loadRedeemedState() {
+            try {
+                const saved = localStorage.getItem('love_coupons_redeemed');
+                if (saved) {
+                    redeemedCoupons = new Set(JSON.parse(saved));
+                }
+            } catch (e) {
+                console.error("Error reading localStorage", e);
+            }
+        }
+
+        function saveRedeemedState() {
+            try {
+                localStorage.setItem('love_coupons_redeemed', JSON.stringify([...redeemedCoupons]));
+            } catch (e) {
+                console.error("Error saving to localStorage", e);
+            }
+        }
+
+        function renderCategoryFilters() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = CATEGORIES.map(cat => {
+                const isActive = currentCategory === cat.id;
+                const activeClass = isActive ? "bg-rose-500 text-white shadow-md scale-105" : "bg-white/80 text-gray-700 hover:bg-pink-100 border border-pink-200";            
+                return `
+                    <button 
+                        onclick="setCategory('${cat.id}')"
+                        class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${activeClass}">
+                        ${cat.label}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setCategory(catId) {
+            currentCategory = catId;
+            renderCategoryFilters();
+            renderCoupons();
+        }
+
+        function renderCoupons() {
+            const grid = document.getElementById('coupons-grid');
+            const filtered = currentCategory === 'todos' ? ALL_COUPONS : ALL_COUPONS.filter(c => c.category === currentCategory);
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-pink-400">No hay cupones en esta categoría.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(coupon => {
+                const isRedeemed = redeemedCoupons.has(coupon.id);
+                return `
+                    <div class="relative glass-card rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between border-2 border-dashed border-pink-300 group overflow-hidden ${isRedeemed ? 'opacity-75 grayscale-[30%]' : ''}">
+                        <div class="ticket-notch-left"></div>
+                        <div class="ticket-notch-right"></div>
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${coupon.color} text-white flex items-center justify-center text-lg shadow-sm">
+                                    <i class="${coupon.icon}"></i>
+                                </div>
+                                ${isRedeemed 
+                                    ? `<span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-check"></i> Canjeado</span>`
+                                    : `<span class="bg-pink-100 text-rose-600 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Disponible</span>`
+                                }
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-rose-600 transition-colors">
+                                ${coupon.title}
+                            </h3>
+                            <p class="text-sm text-gray-600 leading-relaxed mb-6">
+                                ${coupon.description}
+                            </p>
+                        </div>
+
+                        <div>
+                            ${isRedeemed
+                                ? `<button disabled class="w-full bg-gray-200 text-gray-500 font-bold py-2.5 px-4 rounded-xl text-sm cursor-not-allowed">
+                                    ¡Ya Canjeado!
+                                   </button>`
+                                : `<button onclick="openRedemptionModal('${coupon.id}')" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-2.5 px-4 rounded-xl text-sm shadow transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-ticket"></i> Canjear Cupón
+                                   </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openRedemptionModal(couponId) {
+            const coupon = ALL_COUPONS.find(c => c.id === couponId);
+            if (!coupon) return;
+            selectedCouponForModal = coupon;
+            document.getElementById('modal-coupon-name').innerText = coupon.title;
+            document.getElementById('modal-coupon-detail').innerText = coupon.description;
+            const modal = document.getElementById('redemption-modal');
+            const modalCard = document.getElementById('modal-card');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalCard.classList.remove('scale-95');
+            modalCard.classList.add('scale-100');
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('redemption-modal');
+            const modalCard = document.getElementById('modal-card');
+            modalCard.classList.remove('scale-100');
+            modalCard.classList.add('scale-95');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            selectedCouponForModal = null;
+        }
+
+        function markAsRedeemedOnly() {
+            if (selectedCouponForModal) {
+                redeemedCoupons.add(selectedCouponForModal.id);
+                saveRedeemedState();
+                renderCoupons();
+                closeModal();
+            }
+        }
+
+        function sendWhatsAppRedemption() {
+            if (!selectedCouponForModal) return;
+            redeemedCoupons.add(selectedCouponForModal.id);
+            saveRedeemedState();
+            renderCoupons();            
+            const message = `Hola mi amor precioso, vengo a canjear mi cupón especial:\n\n🎟️ *${selectedCouponForModal.title}*\n"${selectedCouponForModal.description}"\n\n¿Cuándo lo hacemos realidad?`;
+            const encodedMessage = encodeURIComponent(message);
+            const phoneNumber = "51902137926";            
+            window.open(`https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`, '_blank');
+            closeModal();
+        }
+
+        function confirmResetAll() {
+            if (redeemedCoupons.size === 0) {
+                alert("¡Todos los cupones están disponibles actualmente!");
+                return;
+            }
+
+            const confirmReset = confirm("¿Quieres reiniciar todos los cupones para volver a usarlos?");
+            if (confirmReset) {
+                redeemedCoupons.clear();
+                saveRedeemedState();
+                renderCoupons();
+            }
+        }
+
+        function createFloatingHearts() {
+            const container = document.getElementById('hearts-container');
+            const heartIcons = ['❤️', '💖', '💕', '💗', '✨'];
+
+            setInterval(() => {
+                if (container.childElementCount > 15) return;
+                const heart = document.createElement('div');
+                heart.classList.add('floating-heart');
+                heart.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                heart.style.fontSize = (Math.random() * 12 + 16) + 'px';
+                container.appendChild(heart);
+                setTimeout(() => {
+                    heart.remove();
+                }, 7000);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
